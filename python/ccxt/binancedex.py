@@ -134,6 +134,7 @@ class binancedex(Exchange):
             },
         })
 
+<<<<<<< HEAD
     def fetch_currencies(self, params={}):
         params['limit'] = self.safe_value(params, 'limit', 1000)
         response = self.publicGetTokens(params)
