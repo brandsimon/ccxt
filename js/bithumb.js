@@ -133,6 +133,10 @@ module.exports = class bithumb extends Exchange {
                     active = false;
                 }
             }
+            let pricePrecision = 4;
+            if (currencyId === 'BTC') {
+                pricePrecision = 5;
+            }
             result.push ({
                 'id': currencyId,
                 'symbol': symbol,
@@ -142,7 +146,7 @@ module.exports = class bithumb extends Exchange {
                 'active': active,
                 'precision': {
                     'amount': 4,
-                    'price': 4,
+                    'price': pricePrecision,
                 },
                 'limits': {
                     'amount': {
