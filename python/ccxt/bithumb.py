@@ -139,6 +139,9 @@ class bithumb(Exchange):
                 numElements = len(market)
                 if numElements == 0:
                     active = False
+            pricePrecision = 4
+            if currencyId == 'BTC':
+                pricePrecision = 5
             result.append({
                 'id': currencyId,
                 'symbol': symbol,
@@ -148,7 +151,7 @@ class bithumb(Exchange):
                 'active': active,
                 'precision': {
                     'amount': 4,
-                    'price': 4,
+                    'price': pricePrecision,
                 },
                 'limits': {
                     'amount': {
