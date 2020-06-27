@@ -352,7 +352,7 @@ class binancedex(Exchange):
         if side == 'sell':
             order_side = 2
         msg = {
-            'body': create_order_msg(self.accountInfo['wallet'], market['id'], order_type, order_side, amount, price),
+            'body': create_order_msg(self.accountInfo['wallet'], market['id'], order_type, order_side, float(amount), float(price)),
         }
         response = self.privatePostBroadcastSync1(msg)
         self.accountInfo['wallet'].increment_sequence()
