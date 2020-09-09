@@ -526,7 +526,9 @@
     "xena.exchange",
     "Xena Exchange",
     "bitget.com",
-    "Bitget"
+    "Bitget",
+    "exchange.bitcoin.com",
+    "bitcoin.com"
   ],
   "collective": {
     "type": "opencollective",
