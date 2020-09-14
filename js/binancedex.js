@@ -91,7 +91,7 @@ module.exports = class binancedex extends Exchange {
                 },
                 'broad': {
                     'signature verification failed': AuthenticationError,
-                }
+                },
             },
             'api': {
                 'public': {
@@ -452,8 +452,8 @@ module.exports = class binancedex extends Exchange {
         if (!response || code === 200) {
             return; // fallback to default error handler
         }
-        const error = this.safeValue (response, 'message');
-        if (error) {
+        const message = this.safeValue (response, 'message');
+        if (message) {
             const feedback = this.id + ' ' + this.json (response);
             this.throwExactlyMatchedException (this.exceptions['exact'], message, feedback);
             this.throwBroadlyMatchedException (this.exceptions['broad'], message, feedback);
