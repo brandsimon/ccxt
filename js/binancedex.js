@@ -330,6 +330,24 @@ module.exports = class binancedex extends Exchange {
         return this.parseBalance (result);
     }
 
+    async fetchAccountInfo (params = {}) {
+        const request = {
+            'address': this.walletAddress,
+        };
+        const response = await this.publicGetAccountAddress (this.extend (request, params));
+        this.accountInfo = {
+            'sequence': response['sequence'],
+            'public_key': response['public_key'],
+            'account_number': response['account_number'],
+        };
+        return this.accountInfo;
+    }
+
+    isAccountInfoAvailable () {
+        const keys = Object.keys (this.accountInfo);
+        return keys.length === 3;
+    }
+
     async fetchOrderBook (symbol, limit = undefined, params = {}) {
         await this.loadMarkets ();
         const market = this.market (symbol);
