@@ -3,7 +3,7 @@
 //  ---------------------------------------------------------------------------
 
 const Exchange = require ('./base/Exchange');
-const { NotSupported } = require ('./base/errors');
+const { AuthenticationError, ExchangeError, NotSupported } = require ('./base/errors');
 const { TICK_SIZE } = require ('./base/functions/number');
 
 //  ---------------------------------------------------------------------------
@@ -87,6 +87,11 @@ module.exports = class binancedex extends Exchange {
                 },
             },
             'exceptions': {
+                'exact': {
+                },
+                'broad': {
+                    'signature verification failed': AuthenticationError,
+                }
             },
             'api': {
                 'public': {
@@ -441,5 +446,18 @@ module.exports = class binancedex extends Exchange {
             body = this.json (params);
         }
         return { 'url': url, 'method': method, 'body': body, 'headers': headers };
+    }
+
+    handleErrors (code, reason, url, method, headers, body, response, requestHeaders, requestBody) {
+        if (!response || code === 200) {
+            return; // fallback to default error handler
+        }
+        const error = this.safeValue (response, 'message');
+        if (error) {
+            const feedback = this.id + ' ' + this.json (response);
+            this.throwExactlyMatchedException (this.exceptions['exact'], message, feedback);
+            this.throwBroadlyMatchedException (this.exceptions['broad'], message, feedback);
+            throw new ExchangeError (feedback); // unknown error
+        }
     }
 };
