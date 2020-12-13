@@ -354,7 +354,7 @@ class binancedex(Exchange):
         msg = {
             'body': create_order_msg(self.accountInfo['wallet'], market['id'], order_type, order_side, float(amount), float(price)),
         }
-        response = self.privatePostBroadcastSync1(msg)
+        response = await self.privatePostBroadcastSync1(msg)
         self.accountInfo['wallet'].increment_sequence()
         return {
             'info': response,
@@ -371,7 +371,7 @@ class binancedex(Exchange):
             'body': cancel_order_msg(self.accountInfo['wallet'], id, market['id']),
         }
         result = {
-            'info': self.privatePostBroadcastSync1(msg),
+            'info': await self.privatePostBroadcastSync1(msg),
         }
         self.accountInfo['wallet'].increment_sequence()
         return result
