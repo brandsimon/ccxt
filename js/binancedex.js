@@ -374,7 +374,7 @@ module.exports = class binancedex extends Exchange {
             'market': market['id'],
             'order_side': order_side,
         };
-        const response = this.privatePostBroadcastSync1 (msg);
+        const response = await this.privatePostBroadcastSync1 (msg);
         // self.accountInfo['wallet'].increment_sequence()
         return {
             'info': response,
@@ -394,7 +394,7 @@ module.exports = class binancedex extends Exchange {
             'id': market['id'],
         };
         const result = {
-            'info': this.privatePostBroadcastSync1 (msg),
+            'info': await this.privatePostBroadcastSync1 (msg),
         };
         // self.accountInfo['wallet'].increment_sequence()
         return result;
