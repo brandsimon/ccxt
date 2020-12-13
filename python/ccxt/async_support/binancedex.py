@@ -344,10 +344,9 @@ class binancedex(Exchange):
         if type != 'limit':
             raise ExchangeError(self.id + ' allows limit orders only')
         await self.load_markets()
+        await self.fetch_account_info()
         market = self.market(symbol)
         order_type = 2
-        if not self.is_account_info_available():
-            await self.fetch_account_info()
         order_side = 1
         if side == 'sell':
             order_side = 2
@@ -363,8 +362,7 @@ class binancedex(Exchange):
         }
 
     async def cancel_order(self, id, symbol=None, params={}):
-        if not self.is_account_info_available():
-            await self.fetch_account_info()
+        await self.fetch_account_info()
         await self.load_markets()
         market = self.market(symbol)
         msg = {
