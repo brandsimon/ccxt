@@ -1679,6 +1679,15 @@ class bitmart(Exchange):
         #         }
         #     }
         #
+        # spot alternative
+        #
+        #     {
+        #         "code": 1000,
+        #         "trace":"886fb6ae-456b-4654-b4e0-d681ac05cea1",
+        #         "message": "OK",
+        #         "data": True
+        #     }
+        #
         # contract
         #
         #     {
@@ -1694,7 +1703,9 @@ class bitmart(Exchange):
         #     }
         #
         data = self.safe_value(response, 'data')
-        succeeded = self.safe_value(data, 'succeed')
+        succeeded = [id]
+        if data is not True:
+            succeeded = self.safe_value(data, 'succeed')
         if succeeded is not None:
             id = self.safe_string(succeeded, 0)
             if id is None:
