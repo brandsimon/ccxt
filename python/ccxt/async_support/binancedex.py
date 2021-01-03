@@ -442,6 +442,7 @@ class binancedex(Exchange):
         request = {
             'id': id,
         }
+        await self.sleep(2000)
         response = await self.publicGetOrdersId(self.extend(request, params))
         return self.parse_order(response, symbol)
 
