@@ -78,7 +78,7 @@ class binancedex(Exchange):
             },
             'urls': {
                 'logo': '',
-                'api': 'https://dex.binance.org/',
+                'api': 'https://dex-european.binance.org/',
                 'www': 'https://binance.org/',
                 'doc': 'https://docs.binance.org/api-reference/',
                 'fees': 'https://docs.binance.org/trading-spec.html',
