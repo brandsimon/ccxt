@@ -205,8 +205,11 @@ module.exports = class bithumbglobal extends Exchange {
 
     async fetchTicker (symbol, params = {}) {
         await this.loadMarkets ();
-        const tickers = await this.fetchTickers ([symbol], params);
-        return tickers[symbol];
+        const ob = await this.fetchOrderBook (symbol);
+        const ticker = this.parseTicker ({});
+        ticker['bid'] = ob['bids'][0][0];
+        ticker['ask'] = ob['asks'][0][0];
+        return ticker;
     }
 
     async fetchTickers (symbols = undefined, params = {}) {

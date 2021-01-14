@@ -205,8 +205,11 @@ class bithumbglobal(Exchange):
 
     def fetch_ticker(self, symbol, params={}):
         self.load_markets()
-        tickers = self.fetch_tickers([symbol], params)
-        return tickers[symbol]
+        ob = self.fetch_order_book(symbol)
+        ticker = self.parse_ticker({})
+        ticker['bid'] = ob['bids'][0][0]
+        ticker['ask'] = ob['asks'][0][0]
+        return ticker
 
     def fetch_tickers(self, symbols=None, params={}):
         self.load_markets()
