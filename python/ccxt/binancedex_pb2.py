@@ -1,12 +1,9 @@
-import hashlib
 import math
 import binascii
 import json
-import array
 from google.protobuf import descriptor, message, reflection, symbol_database
 from collections import OrderedDict
-from ecdsa import SECP256k1, SigningKey
-from ecdsa.util import sigencode_string
+from secp256k1 import PrivateKey
 
 
 def encode_latin1(s):
@@ -23,7 +20,8 @@ DESCRIPTOR = descriptor.FileDescriptor(
     serialized_pb=encode_latin1('\n\tdex.proto\x12\x0btransaction\"U\n\x05StdTx\x12\x0c\n\x04msgs\x18\x01 \x03(\x0c\x12\x12\n\nsignatures\x18\x02 \x03(\x0c\x12\x0c\n\x04memo\x18\x03 \x01(\t\x12\x0e\n\x06source\x18\x04 \x01(\x03\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"f\n\x0cStdSignature\x12\x0f\n\x07pub_key\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\x12\x16\n\x0e\x61\x63\x63ount_number\x18\x03 \x01(\x03\x12\x10\n\x08sequence\x18\x04 \x01(\x03\x1a\x08\n\x06PubKey\"\x8d\x01\n\x08NewOrder\x12\x0e\n\x06sender\x18\x01 \x01(\x0c\x12\n\n\x02id\x18\x02 \x01(\t\x12\x0e\n\x06symbol\x18\x03 \x01(\t\x12\x11\n\tordertype\x18\x04 \x01(\x03\x12\x0c\n\x04side\x18\x05 \x01(\x03\x12\r\n\x05price\x18\x06 \x01(\x03\x12\x10\n\x08quantity\x18\x07 \x01(\x03\x12\x13\n\x0btimeinforce\x18\x08 \x01(\x03\"<\n\x0b\x43\x61ncelOrder\x12\x0e\n\x06sender\x18\x01 \x01(\x0c\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\r\n\x05refid\x18\x03 \x01(\t\";\n\x0bTokenFreeze\x12\x0c\n\x04\x66rom\x18\x01 \x01(\x0c\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x03\"=\n\rTokenUnfreeze\x12\x0c\n\x04\x66rom\x18\x01 \x01(\x0c\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x03\"&\n\x05Token\x12\r\n\x05\x64\x65nom\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x03\";\n\x05Input\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0c\x12!\n\x05\x63oins\x18\x02 \x03(\x0b\x32\x12.transaction.Token\"<\n\x06Output\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0c\x12!\n\x05\x63oins\x18\x02 \x03(\x0b\x32\x12.transaction.Token\"P\n\x04Send\x12\"\n\x06inputs\x18\x01 \x03(\x0b\x32\x12.transaction.Input\x12$\n\x07outputs\x18\x02 \x03(\x0b\x32\x13.transaction.Output\":\n\x04Vote\x12\x13\n\x0bproposal_id\x18\x01 \x01(\x03\x12\r\n\x05voter\x18\x02 \x01(\x0c\x12\x0e\n\x06option\x18\x03 \x01(\x03\x42*\n\x19\x63om.binance.dex.api.protoB\x0bTransactionP\x01\x62\x06proto3')
 )
 
-PROTOBUF_TX = descriptor.Descriptor(
+
+_STDTX = descriptor.Descriptor(
     name='StdTx',
     full_name='transaction.StdTx',
     filename=None,
@@ -81,7 +79,8 @@ PROTOBUF_TX = descriptor.Descriptor(
     serialized_end=111,
 )
 
-PROTOBUF_SIGNATURE_PUBKEY = descriptor.Descriptor(
+
+_STDSIGNATURE_PUBKEY = descriptor.Descriptor(
     name='PubKey',
     full_name='transaction.StdSignature.PubKey',
     filename=None,
@@ -104,7 +103,7 @@ PROTOBUF_SIGNATURE_PUBKEY = descriptor.Descriptor(
     serialized_end=215,
 )
 
-PROTOBUF_SIGNATURE = descriptor.Descriptor(
+_STDSIGNATURE = descriptor.Descriptor(
     name='StdSignature',
     full_name='transaction.StdSignature',
     filename=None,
@@ -142,7 +141,7 @@ PROTOBUF_SIGNATURE = descriptor.Descriptor(
     ],
     extensions=[
     ],
-    nested_types=[PROTOBUF_SIGNATURE_PUBKEY, ],
+    nested_types=[_STDSIGNATURE_PUBKEY, ],
     enum_types=[
     ],
     serialized_options=None,
@@ -154,6 +153,7 @@ PROTOBUF_SIGNATURE = descriptor.Descriptor(
     serialized_start=113,
     serialized_end=215,
 )
+
 
 _NEWORDER = descriptor.Descriptor(
     name='NewOrder',
@@ -234,6 +234,7 @@ _NEWORDER = descriptor.Descriptor(
     serialized_end=359,
 )
 
+
 _CANCELORDER = descriptor.Descriptor(
     name='CancelOrder',
     full_name='transaction.CancelOrder',
@@ -278,25 +279,26 @@ _CANCELORDER = descriptor.Descriptor(
     serialized_end=421,
 )
 
-PROTOBUF_SIGNATURE_PUBKEY.containing_type = PROTOBUF_SIGNATURE
-DESCRIPTOR.message_types_by_name['StdTx'] = PROTOBUF_TX
-DESCRIPTOR.message_types_by_name['StdSignature'] = PROTOBUF_SIGNATURE
+
+_STDSIGNATURE_PUBKEY.containing_type = _STDSIGNATURE
+DESCRIPTOR.message_types_by_name['StdTx'] = _STDTX
+DESCRIPTOR.message_types_by_name['StdSignature'] = _STDSIGNATURE
 DESCRIPTOR.message_types_by_name['NewOrder'] = _NEWORDER
 DESCRIPTOR.message_types_by_name['CancelOrder'] = _CANCELORDER
 sym_db_default.RegisterFileDescriptor(DESCRIPTOR)
 
 StdTx = reflection.GeneratedProtocolMessageType('StdTx', (message.Message,), dict(
-    DESCRIPTOR=PROTOBUF_TX,
+    DESCRIPTOR=_STDTX,
     __module__='dex_pb2'
 ))
 sym_db_default.RegisterMessage(StdTx)
 
 StdSignature = reflection.GeneratedProtocolMessageType('StdSignature', (message.Message,), dict(
     PubKey=reflection.GeneratedProtocolMessageType('PubKey', (message.Message,), dict(
-        DESCRIPTOR=PROTOBUF_SIGNATURE_PUBKEY,
+        DESCRIPTOR=_STDSIGNATURE_PUBKEY,
         __module__='dex_pb2'
     )),
-    DESCRIPTOR=PROTOBUF_SIGNATURE,
+    DESCRIPTOR=_STDSIGNATURE,
     __module__='dex_pb2'
 ))
 sym_db_default.RegisterMessage(StdSignature)
@@ -479,7 +481,7 @@ class Signature:
             ('msgs', [self._msg.to_dict()]),
             ('sequence', str(self._msg.wallet().sequence())),
             ('source', str(self._source))
-        ]), ensure_ascii=False, separators=(',', ':'))
+        ]), ensure_ascii=False)
 
     def to_bytes_json(self):
         return self.to_json().encode()
@@ -532,7 +534,43 @@ class StdTxMsg(Msg):
         return stdtx
 
 
-def convertbits(data, frombits, tobits):
+def bech32_polymod(values):
+    generator = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
+    chk = 1
+    for value in values:
+        top = chk >> 25
+        chk = (chk & 0x1ffffff) << 5 ^ value
+        for i in range(5):
+            chk ^= generator[i] if ((top >> i) & 1) else 0
+    return chk
+
+
+def bech32_hrp_expand(hrp):
+    return [ord(x) >> 5 for x in hrp] + [0] + [ord(x) & 31 for x in hrp]
+
+
+def bech32_verify_checksum(hrp, data):
+    return bech32_polymod(bech32_hrp_expand(hrp) + data) == 1
+
+
+def bech32_decode(bech):
+    CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+    if (any(ord(x) < 33 or ord(x) > 126 for x in bech)) or (bech.lower() != bech and bech.upper() != bech):
+        return None, None
+    bech = bech.lower()
+    pos = bech.rfind('1')
+    if pos < 1 or pos + 7 > len(bech) or len(bech) > 90:
+        return None, None
+    if not all(x in CHARSET for x in bech[pos + 1:]):
+        return None, None
+    hrp = bech[:pos]
+    data = [CHARSET.find(x) for x in bech[pos + 1:]]
+    if not bech32_verify_checksum(hrp, data):
+        return None, None
+    return hrp, data[:-6]
+
+
+def convertbits(data, frombits, tobits, pad=True):
     acc = 0
     bits = 0
     ret = []
@@ -546,42 +584,43 @@ def convertbits(data, frombits, tobits):
         while bits >= tobits:
             bits -= tobits
             ret.append((acc >> bits) & maxv)
-    if bits >= frombits or ((acc << (tobits - bits)) & maxv):
+    if pad:
+        if bits:
+            ret.append((acc << (tobits - bits)) & maxv)
+    elif bits >= frombits or ((acc << (tobits - bits)) & maxv):
         return None
     return ret
 
 
-def bech32_decode(bech):
-    CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
-    bech = bech.lower()
-    pos = bech.rfind('1')
-    data = [CHARSET.find(x) for x in bech[pos + 1:]]
-    bits = convertbits(data[:-6], 5, 8)
+def decode_address(address):
+    hrp, data = bech32_decode(address)
+    if hrp is None:
+        return None
+
+    bits = convertbits(data, 5, 8, False)
     return array.array('B', bits).tobytes()
 
 
 class Wallet:
 
     def __init__(self, private_key, account_number, address, sequence):
+        self._pk = PrivateKey(bytes(bytearray.fromhex(private_key)))
+        self._public_key = self._pk.pubkey.serialize(compressed=True)
         self._address = address
-        self._signing_key = SigningKey.from_string(bytes.fromhex(private_key),
-                                                   curve=SECP256k1)
-        self._public_key = self._signing_key.verifying_key.to_string()
         self._sequence = sequence
-        self._address = address
         self._account_number = account_number
 
-    def sign_message(self, message):
-        return self._signing_key.sign(message, hashfunc=hashlib.sha256, sigencode=sigencode_string)
+    def generate_order_id(self):
+        return f"{binascii.hexlify(self.address_decoded()).decode().upper()}-{(self._sequence + 1)}"
 
     def address(self):
         return self._address
 
     def address_decoded(self):
-        return bech32_decode(self._address)
+        return decode_address(self._address)
 
     def public_key(self):
-        return bytes(b'\x03') + self._public_key[:32]
+        return self._public_key
 
     def account_number(self):
         return self._account_number
@@ -593,13 +632,11 @@ class Wallet:
         return self._sequence
 
     def chain_id(self):
-        # node-info: node_info network
         return 'Binance-Chain-Tigris'
 
-    def generate_order_id(self):
-        return "{}-{}".format(
-            binascii.hexlify(self.address_decoded()).decode().upper(),
-            self._sequence + 1)
+    def sign_message(self, msg_bytes):
+        sig = self._pk.ecdsa_sign(msg_bytes)
+        return self._pk.ecdsa_serialize_compact(sig)
 
 
 def create_order_msg(wallet, symbol, type, side, amount, price):
