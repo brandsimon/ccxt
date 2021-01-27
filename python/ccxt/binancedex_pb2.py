@@ -1,3 +1,4 @@
+import array
 import math
 import binascii
 import json
@@ -481,7 +482,7 @@ class Signature:
             ('msgs', [self._msg.to_dict()]),
             ('sequence', str(self._msg.wallet().sequence())),
             ('source', str(self._source))
-        ]), ensure_ascii=False)
+        ]), ensure_ascii=False, separators=(',', ':'))
 
     def to_bytes_json(self):
         return self.to_json().encode()
@@ -611,7 +612,7 @@ class Wallet:
         self._account_number = account_number
 
     def generate_order_id(self):
-        return f"{binascii.hexlify(self.address_decoded()).decode().upper()}-{(self._sequence + 1)}"
+        return f"{binascii.hexlify(self.address_decoded()).decode().upper()}-{(self.sequence() + 1)}"
 
     def address(self):
         return self._address
