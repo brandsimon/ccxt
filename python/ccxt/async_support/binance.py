@@ -6,6 +6,7 @@
 from ccxt.async_support.base.exchange import Exchange
 import math
 import json
+import asyncio
 from ccxt.base.errors import ExchangeError
 from ccxt.base.errors import AuthenticationError
 from ccxt.base.errors import PermissionDenied
@@ -1672,6 +1673,7 @@ class binance(Exchange):
         if symbol is None:
             raise ArgumentsRequired(self.id + ' fetchOrder requires a symbol argument')
         await self.load_markets()
+        await asyncio.sleep(2)
         market = self.market(symbol)
         defaultType = self.safe_string_2(self.options, 'fetchOrder', 'defaultType', market['type'])
         type = self.safe_string(params, 'type', defaultType)
