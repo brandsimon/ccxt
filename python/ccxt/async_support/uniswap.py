@@ -244,6 +244,7 @@ class uniswap(Exchange):
 
         market = self.market(symbol)
         amount = float(amount)
+        price = float(price)
         orig_amount = amount
         amount = int(amount * ONE_ETH)
         market = self.market(symbol)
