@@ -243,6 +243,7 @@ class uniswap(Exchange):
         uniswap = await self.get_uniswap()
 
         market = self.market(symbol)
+        amount = float(amount)
         orig_amount = amount
         amount = int(amount * ONE_ETH)
         market = self.market(symbol)
