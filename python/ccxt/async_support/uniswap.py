@@ -117,6 +117,7 @@ class uniswap(Exchange):
                 web3=w3,
                 deadline=self.options['deadline'],
                 max_slippage=self.options['slippage'])
+            self.uniswap.max_approval_check_int = 1 * 10 ** 28
         return self.uniswap
 
     async def fetch_markets(self, params={}):
