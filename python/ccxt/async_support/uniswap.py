@@ -13,6 +13,7 @@ import web3
 from web3 import Web3
 from uniswap import Uniswap
 from eth_utils import decode_hex
+from web3.gas_strategies.time_based import fast_gas_price_strategy
 
 ONE_ETH = 1 * 10 ** 18
 
@@ -95,8 +96,13 @@ class uniswap(Exchange):
                     self.options['provider'],
                     request_kwargs={"timeout": self.options['deadline'] + 10}))
 
-            def gas_price_strategy(web3, transaction_params=None):
-                return Web3.toWei(self.options['gasPrice'], 'gwei')
+            param_gas = self.options['gasPrice']
+
+            if param_gas == 0:
+                gas_price_strategy = fast_gas_price_strategy
+            else:
+                def gas_price_strategy(web3, transaction_params=None):
+                    return Web3.toWei(param_gas, 'gwei')
 
             self.w3_instance.eth.setGasPriceStrategy(gas_price_strategy)
         return self.w3_instance
