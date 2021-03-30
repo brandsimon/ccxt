@@ -4,24 +4,9 @@
 # https://github.com/ccxt/ccxt/blob/master/CONTRIBUTING.md#how-to-contribute-code
 
 from ccxt.async_support.base.exchange import Exchange
-import math
-import json
 from ccxt.base.errors import ExchangeError
-from ccxt.base.errors import AuthenticationError
-from ccxt.base.errors import PermissionDenied
-from ccxt.base.errors import AccountSuspended
-from ccxt.base.errors import ArgumentsRequired
 from ccxt.base.errors import BadRequest
-from ccxt.base.errors import BadSymbol
-from ccxt.base.errors import InsufficientFunds
-from ccxt.base.errors import InvalidOrder
 from ccxt.base.errors import OrderNotFound
-from ccxt.base.errors import OrderImmediatelyFillable
-from ccxt.base.errors import NotSupported
-from ccxt.base.errors import DDoSProtection
-from ccxt.base.errors import RateLimitExceeded
-from ccxt.base.errors import ExchangeNotAvailable
-from ccxt.base.errors import InvalidNonce
 from ccxt.base.decimal_to_precision import TICK_SIZE
 
 import web3
