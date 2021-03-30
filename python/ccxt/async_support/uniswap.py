@@ -169,8 +169,6 @@ class uniswap(Exchange):
             code = self.safe_currency_code(id)
             name = code
             precision = None
-            isWithdrawEnabled = True
-            isDepositEnabled = True
             fees = {}
             fee = None
             active = True
