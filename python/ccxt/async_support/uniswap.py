@@ -98,11 +98,14 @@ class uniswap(Exchange):
 
             param_gas = self.options['gasPrice']
 
-            if param_gas == 0:
-                gas_price_strategy = fast_gas_price_strategy
-            else:
-                def gas_price_strategy(web3, transaction_params=None):
-                    return Web3.toWei(param_gas, 'gwei')
+            def gas_price_strategy(web3, transaction_params=None):
+                if param_gas == 0:
+                    gas_price = fast_gas_price_strategy(web3, transaction_params)
+                else:
+                    gas_price = Web3.toWei(param_gas, 'gwei')
+                if gas_price >= Web3.toWei(1000, 'gwei'):
+                    raise ValueError('Gas price to high: {}'.format(gas_price))
+                return gas_price
 
             self.w3_instance.eth.setGasPriceStrategy(gas_price_strategy)
         return self.w3_instance
