@@ -16,6 +16,7 @@ from eth_utils import decode_hex
 from web3.gas_strategies.time_based import fast_gas_price_strategy
 
 ONE_ETH = 1 * 10 ** 18
+MAX_GAS_PRICE = Web3.toWei(1000, 'gwei')
 
 
 class uniswap(Exchange):
@@ -103,7 +104,7 @@ class uniswap(Exchange):
                     gas_price = fast_gas_price_strategy(web3, transaction_params)
                 else:
                     gas_price = Web3.toWei(param_gas, 'gwei')
-                if gas_price >= Web3.toWei(1000, 'gwei'):
+                if gas_price >= MAX_GAS_PRICE:
                     raise ValueError('Gas price to high: {}'.format(gas_price))
                 return gas_price
 
@@ -400,7 +401,7 @@ class uniswap(Exchange):
         if old_gas_price is None:
             old_gas_price = fast_gas_price_strategy(w3, None)
         gas_price = int(old_gas_price * 1.15)
-        if gas_price >= Web3.toWei(1000, 'gwei'):
+        if gas_price >= MAX_GAS_PRICE:
             raise ValueError('Gas price to high: {}'.format(gas_price))
         cancel_tx = uniswap.cancel_transaction(nonce=nonce, gas_price=gas_price)
         w3.eth.waitForTransactionReceipt(cancel_tx, timeout=deadline - now)
