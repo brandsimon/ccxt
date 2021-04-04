@@ -386,8 +386,10 @@ class uniswap(Exchange):
         tx = decode_hex(id)
         deadline = self.safe_integer(params, 'deadline', 0)
         nonce = self.safe_integer(params, 'nonce')
+        old_gas_price = None
         try:
             transaction = w3.eth.getTransaction(tx)
+            old_gas_price = transaction['gasPrice']
             if transaction['blockNumber'] is not None:
                 raise BadRequest('Order is mined already')
             nonce = transaction['nonce']
@@ -395,6 +397,10 @@ class uniswap(Exchange):
             if deadline < now:
                 return
 
-        gas_price = Web3.toWei(int(self.options['gasPrice'] * 1.15), 'gwei')
+        if old_gas_price is None:
+            old_gas_price = fast_gas_price_strategy(w3, None)
+        gas_price = int(old_gas_price * 1.15)
+        if gas_price >= Web3.toWei(1000, 'gwei'):
+            raise ValueError('Gas price to high: {}'.format(gas_price))
         cancel_tx = uniswap.cancel_transaction(nonce=nonce, gas_price=gas_price)
         w3.eth.waitForTransactionReceipt(cancel_tx, timeout=deadline - now)
