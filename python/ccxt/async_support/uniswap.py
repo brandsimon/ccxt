@@ -321,6 +321,14 @@ class uniswap(Exchange):
                     status = 'closed'
                     filled = amount
                 fee = receipt['gasUsed']
+
+                if receipt['blockNumber'] is not None:
+                    if side == 'sell':
+                        exact_amount_out = int.from_bytes(decode_hex(receipt.logs[1].data), 'big')
+                        price = exact_amount_out / parsed['amountIn']
+                    else:
+                        exact_amount_in = int.from_bytes(decode_hex(receipt.logs[1].data), 'big')
+                        price = exact_amount_in / parsed['amountOut']
             except web3.exceptions.TransactionNotFound:
                 pass
 
