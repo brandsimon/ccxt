@@ -473,6 +473,15 @@ module.exports = class binancedex extends Exchange {
         };
     }
 
+    async fetchOrder (id, symbol = undefined, params = {}) {
+        await this.loadMarkets ();
+        const request = {
+            'id': id,
+        };
+        const response = await this.publicGetOrdersId (this.extend (request, params));
+        return this.parseOrder (response, symbol);
+    }
+
     async fetchOpenOrders (symbol = undefined, since = undefined, limit = undefined, params = {}) {
         this.checkRequiredCredentials ();
         await this.loadMarkets ();
