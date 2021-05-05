@@ -39,7 +39,7 @@ module.exports = class binancedex extends Exchange {
                 'fetchMarkets': true,
                 'fetchMyTrades': false,
                 'fetchOHLCV': true,
-                'fetchOpenOrders': false,
+                'fetchOpenOrders': true,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchOrderBooks': false,
@@ -92,6 +92,7 @@ module.exports = class binancedex extends Exchange {
                         'markets',
                         'ticker/24hr',
                         'orders/closed',
+                        'orders/open',
                         'depth',
                         'klines',
                         'orders/{id}',
@@ -470,6 +471,24 @@ module.exports = class binancedex extends Exchange {
                 'currency': feeCurrency,
             },
         };
+    }
+
+    async fetchOpenOrders (symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        this.checkRequiredCredentials ();
+        await this.loadMarkets ();
+        const request = {
+            'address': this.walletAddress,
+            'offset': 0,
+        };
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        if (symbol !== undefined) {
+            request['symbol'] = limit;
+        }
+        const response = await this.publicGetOrdersOpen (this.extend (request, params));
+        const orders = this.safeValue (response, 'order', {});
+        return this.parseOrders (orders, undefined, since, limit);
     }
 
     async fetchClosedOrders (symbol = undefined, since = undefined, limit = undefined, params = {}) {
