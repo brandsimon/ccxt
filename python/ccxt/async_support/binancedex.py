@@ -32,7 +32,7 @@ class binancedex(Exchange):
                 'editOrder': False,
                 'fetchBalance': False,
                 'fetchBidsAsks': False,
-                'fetchClosedOrders': False,
+                'fetchClosedOrders': True,
                 'fetchCurrencies': False,
                 'fetchDepositAddress': False,
                 'fetchDeposits': False,
@@ -42,7 +42,7 @@ class binancedex(Exchange):
                 'fetchMarkets': True,
                 'fetchMyTrades': False,
                 'fetchOHLCV': True,
-                'fetchOpenOrders': False,
+                'fetchOpenOrders': True,
                 'fetchOrder': True,
                 'fetchOrderBook': True,
                 'fetchOrderBooks': False,
@@ -94,6 +94,8 @@ class binancedex(Exchange):
                     'get': [
                         'markets',
                         'ticker/24hr',
+                        'orders/closed',
+                        'orders/open',
                         'depth',
                         'klines',
                         'orders/{id}',
@@ -445,6 +447,38 @@ class binancedex(Exchange):
         await self.sleep(2000)
         response = await self.publicGetOrdersId(self.extend(request, params))
         return self.parse_order(response, symbol)
+
+    async def fetch_open_orders(self, symbol=None, since=None, limit=None, params={}):
+        self.check_required_credentials()
+        await self.load_markets()
+        request = {
+            'address': self.walletAddress,
+            'offset': 0,
+        }
+        if limit is not None:
+            request['limit'] = limit
+        if symbol is not None:
+            request['symbol'] = limit
+        response = await self.publicGetOrdersOpen(self.extend(request, params))
+        orders = self.safe_value(response, 'order', {})
+        return self.parse_orders(orders, None, since, limit)
+
+    async def fetch_closed_orders(self, symbol=None, since=None, limit=None, params={}):
+        self.check_required_credentials()
+        await self.load_markets()
+        request = {
+            'address': self.walletAddress,
+            'offset': 0,
+        }
+        if symbol is not None:
+            request['symbol'] = limit
+        if limit is not None:
+            request['limit'] = limit
+        if since is not None:
+            request['start'] = since
+        response = await self.publicGetOrdersClosed(self.extend(request, params))
+        orders = self.safe_value(response, 'order', {})
+        return self.parse_orders(orders, None, since, limit)
 
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
         url = self.urls['api'] + 'api/v1/' + self.implode_params(path, params)
