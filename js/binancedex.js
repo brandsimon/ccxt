@@ -29,7 +29,7 @@ module.exports = class binancedex extends Exchange {
                 'editOrder': false,
                 'fetchBalance': false,
                 'fetchBidsAsks': false,
-                'fetchClosedOrders': false,
+                'fetchClosedOrders': true,
                 'fetchCurrencies': false,
                 'fetchDepositAddress': false,
                 'fetchDeposits': false,
@@ -91,6 +91,7 @@ module.exports = class binancedex extends Exchange {
                     'get': [
                         'markets',
                         'ticker/24hr',
+                        'orders/closed',
                         'depth',
                         'klines',
                         'orders/{id}',
@@ -471,13 +472,21 @@ module.exports = class binancedex extends Exchange {
         };
     }
 
-    async fetchOrder (id, symbol = undefined, params = {}) {
+    async fetchClosedOrders (symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        this.checkRequiredCredentials ();
         await this.loadMarkets ();
         const request = {
-            'id': id,
+            'address': this.walletAddress,
         };
-        const response = await this.publicGetOrdersId (this.extend (request, params));
-        return this.parseOrder (response, symbol);
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        if (since !== undefined) {
+            request['start'] = since;
+        }
+        const response = await this.publicGetOrdersClosed (this.extend (request, params));
+        const orders = this.safeValue (response, 'order', {});
+        return this.parseOrders (orders, undefined, since, limit);
     }
 
     sign (path, api = 'public', method = 'GET', params = {}, headers = undefined, body = undefined) {
