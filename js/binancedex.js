@@ -496,7 +496,11 @@ module.exports = class binancedex extends Exchange {
         await this.loadMarkets ();
         const request = {
             'address': this.walletAddress,
+            'offset': 0,
         };
+        if (symbol !== undefined) {
+            request['symbol'] = limit;
+        }
         if (limit !== undefined) {
             request['limit'] = limit;
         }
