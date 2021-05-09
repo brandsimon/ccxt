@@ -508,7 +508,7 @@ module.exports = class binancedex extends Exchange {
             'offset': 0,
         };
         if (symbol !== undefined) {
-            request['symbol'] = limit;
+            request['symbol'] = symbol;
         }
         if (limit !== undefined) {
             request['limit'] = limit;
