@@ -471,7 +471,7 @@ class binancedex(Exchange):
             'offset': 0,
         }
         if symbol is not None:
-            request['symbol'] = limit
+            request['symbol'] = symbol
         if limit is not None:
             request['limit'] = limit
         if since is not None:
